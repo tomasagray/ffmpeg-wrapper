@@ -1,5 +1,6 @@
 package net.tomasbot.ffmpeg_wrapper.unit;
 
+import static net.tomasbot.ffmpeg_wrapper.TestData.FFPROBE_BASE_ARGS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ class FFprobeTest {
     // Create FFprobe instance
     logger.info("Instantiating FFprobe with executable: {}", ffprobePath);
 
-    final FFprobe ffProbe = new FFprobe(ffprobePath);
+    final FFprobe ffProbe = new FFprobe(ffprobePath, FFPROBE_BASE_ARGS);
     logger.info("Verifying FFprobe instance is NOT NULL...");
 
     assertThat(ffProbe).isNotNull();
@@ -37,7 +38,7 @@ class FFprobeTest {
   void testFFprobeVersion() throws IOException {
     logger.info("Testing FFprobe version with executable: {} ...", ffprobePath);
 
-    final FFprobe ffProbe = new FFprobe(ffprobePath);
+    final FFprobe ffProbe = new FFprobe(ffprobePath, FFPROBE_BASE_ARGS);
     String version = ffProbe.getVersion();
 
     logger.info("FFprobe version: {}", version);

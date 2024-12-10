@@ -14,17 +14,9 @@ public class FFprobe extends FFexecutable {
 
   private final List<String> baseArgs;
 
-  public FFprobe(@NotNull final String execPath) {
-    // Setup global CLI arguments
+  public FFprobe(@NotNull String execPath, @NotNull List<String> baseArgs) {
     this.execPath = execPath;
-    this.baseArgs =
-        List.of(
-            "-hide_banner",
-            "-print_format",
-            "json",
-            "-show_streams",
-            "-show_format",
-            "-show_chapters");
+    this.baseArgs = baseArgs;
   }
 
   /**

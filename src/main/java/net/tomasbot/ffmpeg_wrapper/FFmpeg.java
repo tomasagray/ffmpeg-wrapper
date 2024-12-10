@@ -24,11 +24,9 @@ public class FFmpeg extends FFexecutable {
 
   @Getter @Setter boolean loggingEnabled = true;
 
-  public FFmpeg(@NotNull final String execPath) {
+  public FFmpeg(@NotNull String execPath, @NotNull List<String> baseArgs) {
     this.execPath = execPath;
-    // TODO: extract base args
-    this.baseArgs =
-        List.of("-v", "info", "-y", "-protocol_whitelist", "concat,file,http,https,tcp,tls,crypto");
+    this.baseArgs = baseArgs;
   }
 
   public FFmpegStreamTask getHlsStreamTask(@NotNull TranscodeRequest request) {

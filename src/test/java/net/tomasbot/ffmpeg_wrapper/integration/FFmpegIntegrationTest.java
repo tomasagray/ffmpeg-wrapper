@@ -78,7 +78,7 @@ public class FFmpegIntegrationTest {
             .build();
 
     // when
-    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     FFmpegStreamTask transcodeTask = ffmpeg.getTranscodeTask(transcodeRequest);
     runTestTask(transcodeTask);
 
@@ -98,7 +98,7 @@ public class FFmpegIntegrationTest {
     final int expectedExitCode = 0;
     final int expectedSegmentCount = 47;
 
-    final FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    final FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     final URL testVideoUrl = TestData.getLargeVideoUrl();
     final Path transcodeOutputDir = Files.createTempDirectory("FFMPEG_HLS_TEST_");
     final Path transcodeOutput = transcodeOutputDir.resolve("playlist.m3u8");
@@ -159,7 +159,7 @@ public class FFmpegIntegrationTest {
             .build();
 
     // when
-    final FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    final FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     FFmpegStreamTask transcodeTask = ffmpeg.getTranscodeTask(transcodeRequest);
     logger.info("Starting concat transcode of: {} to: {}", from, outputFile);
     runTestTask(transcodeTask);
@@ -191,7 +191,7 @@ public class FFmpegIntegrationTest {
     assertThat(testVideoUrl).isNotNull();
 
     // when
-    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     ThumbnailRequest request =
         ThumbnailRequest.builder()
             .video(Path.of(testVideoUrl.toURI()))
@@ -229,7 +229,7 @@ public class FFmpegIntegrationTest {
     final URL testVideoUrl = TestData.getLargeVideoUrl();
     final Path outputFile = Files.createTempFile("FFMPEG_KILL_STREAM_TEST_", ".mkv");
 
-    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     AtomicInteger exitCode = new AtomicInteger(-1);
     SimpleTranscodeRequest transcodeRequest =
         SimpleTranscodeRequest.builder()

@@ -1,5 +1,6 @@
 package net.tomasbot.ffmpeg_wrapper.integration;
 
+import static net.tomasbot.ffmpeg_wrapper.TestData.FFPROBE_BASE_ARGS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class FFprobeIntegrationTest {
     logger.info("Reading file data from: {}", testUrl);
 
     // when
-    final FFprobe ffProbe = new FFprobe(ffprobePath);
+    final FFprobe ffProbe = new FFprobe(ffprobePath, FFPROBE_BASE_ARGS);
     FFmpegMetadata actualMetadata = ffProbe.getFileMetadata(testUrl.toURI());
 
     // then
@@ -59,7 +60,7 @@ public class FFprobeIntegrationTest {
     logger.info("Attempting to read metadata from local video file: {}", videoUrl);
 
     // when
-    FFprobe ffprobe = new FFprobe(ffprobePath);
+    FFprobe ffprobe = new FFprobe(ffprobePath, FFPROBE_BASE_ARGS);
     FFmpegMetadata actualMetadata = ffprobe.getFileMetadata(videoUrl.toURI());
     assertThat(JsonParser.toJson(actualMetadata)).isNotEmpty().isEqualTo(expectedMetadata);
   }

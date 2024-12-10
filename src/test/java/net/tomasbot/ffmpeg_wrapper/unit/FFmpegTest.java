@@ -1,5 +1,6 @@
 package net.tomasbot.ffmpeg_wrapper.unit;
 
+import static net.tomasbot.ffmpeg_wrapper.TestData.FFMPEG_BASE_ARGS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ class FFmpegTest {
   void testFFmpegInstantiation() {
     logger.info("Instantiating FFmpeg with executable: {}", this.ffmpegPath);
 
-    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, FFMPEG_BASE_ARGS);
     logger.info("FFmpeg is: {}", ffmpeg);
 
     assertThat(ffmpeg).isNotNull();
@@ -36,7 +37,7 @@ class FFmpegTest {
   void testFFmpegVersion() throws IOException {
     logger.info("Testing FFmpeg version of executable at: {}", this.ffmpegPath);
 
-    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, FFMPEG_BASE_ARGS);
     String version = ffmpeg.getVersion();
     logger.info("FFmpeg version: {}", version);
 
