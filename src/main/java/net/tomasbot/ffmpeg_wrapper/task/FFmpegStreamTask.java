@@ -15,16 +15,12 @@ import lombok.EqualsAndHashCode;
 import net.tomasbot.ffmpeg_wrapper.FFmpegLogger;
 import net.tomasbot.ffmpeg_wrapper.request.LoggingTranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public abstract class FFmpegStreamTask extends LoggableThread {
-
-  private static final Logger logger = LogManager.getLogger(FFmpegStreamTask.class);
-
+  
   private static final String LOG_FILENAME = "ffmpeg-%s.log";
   private static final OpenOption[] LOG_FILE_OPTS = {
     StandardOpenOption.CREATE, StandardOpenOption.WRITE
@@ -40,8 +36,6 @@ public abstract class FFmpegStreamTask extends LoggableThread {
     try {
       prepareStream();
       final List<String> commandArgs = createExecCommand();
-      logger.info("Executing FFmpeg command: {}", commandArgs);
-
       this.process = new ProcessBuilder().command(commandArgs).start();
 
       if (loggingEnabled) {
@@ -50,6 +44,7 @@ public abstract class FFmpegStreamTask extends LoggableThread {
           this.onError = loggingRequest.getOnError();
           this.onComplete = loggingRequest.getOnComplete();
 
+          this.onEvent.accept("Executing FFmpeg command:\n\t" + String.join(" ", commandArgs));
           logStreamTask();
         } else
           throw new IllegalArgumentException(
