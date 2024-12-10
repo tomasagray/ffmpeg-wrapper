@@ -2,9 +2,12 @@ plugins {
     id 'java'
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
 group = 'net.tomasbot'
 version = findProperty('appVersion')
-sourceCompatibility = '17'
 
 configurations {
     compileOnly {
