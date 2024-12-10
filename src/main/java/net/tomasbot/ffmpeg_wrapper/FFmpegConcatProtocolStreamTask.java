@@ -1,10 +1,5 @@
 package net.tomasbot.ffmpeg_wrapper;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -14,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -21,16 +20,14 @@ public final class FFmpegConcatProtocolStreamTask extends FFmpegStreamTask {
 
     private final Path dataDir;
 
-    @lombok.Builder
-    public FFmpegConcatProtocolStreamTask(
-            @NotNull String command, @NotNull TranscodeRequest request, boolean loggingEnabled) {
+  public FFmpegConcatProtocolStreamTask(
+      @NotNull String command, @NotNull TranscodeRequest request) {
         this.execCommand = command;
         if (Files.isDirectory(request.getTo())) {
             this.dataDir = request.getTo().getParent();
         } else {
             this.dataDir = request.getTo();
         }
-        this.loggingEnabled = loggingEnabled;
     }
 
     @Override

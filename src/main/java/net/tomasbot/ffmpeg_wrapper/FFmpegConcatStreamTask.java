@@ -1,12 +1,6 @@
 package net.tomasbot.ffmpeg_wrapper;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 /** Class which creates an FFMPEG concatenation task; concatenates multiple video files into one */
 @Data
@@ -21,21 +19,14 @@ import java.util.stream.Stream;
 public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
 
     private static final String CONCAT_FILENAME = "concat.txt";
-    private final List<URI> uris;
-    private final Path dataDir;
-    private Path concatFile;
 
-    @lombok.Builder
-    public FFmpegConcatStreamTask(
-            @NotNull String command,
-            @NotNull TranscodeRequest request,
-            boolean loggingEnabled,
-            List<URI> uris) {
+    private Path concatFile;
+  private final Path dataDir;
+
+  public FFmpegConcatStreamTask(@NotNull String command, @NotNull TranscodeRequest request) {
         this.execCommand = command;
         this.request = request;
-        this.dataDir = request.getTo().getParent();
-        this.loggingEnabled = loggingEnabled;
-        this.uris = uris;
+    this.dataDir = this.request.getTo().getParent();
     }
 
     @Override
@@ -43,10 +34,16 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
     @NotNull
     protected List<String> createExecCommand() {
         final List<String> command = new ArrayList<>();
+
         command.add(this.execCommand);
+    command.addAll(this.request.getBaseArgs());
         command.addAll(this.getInputArgs().toList());
-        command.addAll(this.getArgumentList(request.getAdditionalArgs()));
+    Map<String, Object> additionalArgs = request.getAdditionalArgs();
+    if (additionalArgs != null) {
+      command.addAll(this.getArgumentList(additionalArgs));
+    }
         command.add(request.getTo().toString());
+
         return command;
     }
 
@@ -58,10 +55,14 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
 
     @Override
     protected void prepareStream() throws IOException {
-        // Create output directory
-        Files.createDirectories(this.getDataDir());
+    // Create output directory
+    Files.createDirectories(dataDir);
+
         // Create URI list text file
         this.concatFile = createConcatFile();
+    if (!this.concatFile.toFile().exists()) {
+      throw new IOException("Could not create concat file: " + this.concatFile);
+    }
     }
 
     @Override
@@ -76,11 +77,14 @@ public final class FFmpegConcatStreamTask extends FFmpegStreamTask {
      * @throws IOException If there is an error creating or writing the file
      */
     private Path createConcatFile() throws IOException {
-        // Map each URI to en entry in the concat file
-        final String concatFileText =
-                uris.stream().map(url -> String.format("file '%s'\n", url)).collect(Collectors.joining());
-        // Write data to file
-        final Path concatFilePath = Path.of(getDataDir().toAbsolutePath().toString(), CONCAT_FILENAME);
+    // Map each URI to en entry in the concat file
+    final String concatFileText =
+        this.request.getFrom().stream()
+            .map(url -> String.format("file '%s'", url))
+            .collect(Collectors.joining("\n"));
+
+    // Write data to file
+    final Path concatFilePath = this.dataDir.resolve(CONCAT_FILENAME);
         return Files.writeString(concatFilePath, concatFileText);
     }
 }

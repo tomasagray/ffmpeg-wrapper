@@ -21,42 +21,65 @@ import org.jetbrains.annotations.NotNull;
 public abstract class FFmpegStreamTask extends LoggableThread {
 
   private static final Logger logger = LogManager.getLogger(FFmpegStreamTask.class);
+
+  private static final String LOG_FILENAME = "ffmpeg-%s.log";
+  private static final OpenOption[] LOG_FILE_OPTS = {
+    StandardOpenOption.CREATE, StandardOpenOption.WRITE
+  };
   private static final DateTimeFormatter TIMESTAMP_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
-  private static final String LOG_FILENAME = "ffmpeg-%s.log";
 
   protected String execCommand;
   protected TranscodeRequest request;
 
   @Override
-  public void start() {
+  public void run() {
     try {
       prepareStream();
-      final List<String> command = createExecCommand();
+      final List<String> commandArgs = createExecCommand();
+      logger.info("Executing FFmpeg command: {}", commandArgs);
 
-      this.process = new ProcessBuilder().command(command).start();
+      this.process = new ProcessBuilder().command(commandArgs).start();
+
       if (loggingEnabled) {
-        final Path logFile = getLogFile();
-        final OpenOption[] options = {StandardOpenOption.CREATE, StandardOpenOption.WRITE};
-        final AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(logFile, options);
-        logPublisher =
-            new FFmpegLogger()
-                .beginLogging(this.process, fileChannel)
-                .doOnNext(
-                    e -> {
-                      if (onEvent != null) onEvent.accept(e);
-                    })
-                .doOnError(
-                    e -> {
-                      if (onError != null) onError.accept(e);
-                    })
-                .doOnComplete(
-                    () -> process.onExit().thenAccept(p1 -> onComplete.accept(p1.exitValue())));
-        logPublisher.subscribe();
+        if (request instanceof LoggingTranscodeRequest loggingRequest) {
+          this.onEvent = loggingRequest.getOnEvent();
+          this.onError = loggingRequest.getOnError();
+          this.onComplete = loggingRequest.getOnComplete();
+
+          logStreamTask();
+        } else
+          throw new IllegalArgumentException(
+              "Logging enabled but request was not a "
+                  + LoggingTranscodeRequest.class.getSimpleName());
       }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  private void logStreamTask() throws IOException {
+    final Path logFile = getLogFile();
+    final AsynchronousFileChannel fileChannel =
+        AsynchronousFileChannel.open(logFile, LOG_FILE_OPTS);
+
+    logPublisher =
+        new FFmpegLogger()
+            .beginLogging(this.process, fileChannel)
+            .doOnNext(
+                e -> {
+                  if (onEvent != null) onEvent.accept(e);
+                })
+            .doOnError(
+                e -> {
+                  if (onError != null) onError.accept(e);
+                })
+            .doOnComplete(
+                () -> {
+                  if (process != null && onComplete != null)
+                    process.onExit().thenAccept(p1 -> onComplete.accept(p1.exitValue()));
+                });
+    logPublisher.subscribe();
   }
 
   @NotNull

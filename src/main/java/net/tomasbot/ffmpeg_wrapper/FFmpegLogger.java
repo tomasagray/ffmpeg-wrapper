@@ -22,18 +22,17 @@ public class FFmpegLogger implements ThreadLogger {
     fileChannel.write(ByteBuffer.wrap(bytes), writePos.getAndAdd(bytes.length));
   }
 
+  private static Stream<String> readProcessOutput(InputStream dataStream) {
+    return new BufferedReader(new InputStreamReader(dataStream, StandardCharsets.UTF_8)).lines();
+  }
+
   @Override
   @NotNull
   public synchronized Flux<String> beginLogging(
       @NotNull Process process, @NotNull AsynchronousFileChannel fileChannel) {
     final AtomicInteger writePos = new AtomicInteger(0);
     final InputStream dataStream = process.getErrorStream();
-    return Flux.using(
-            () ->
-                new BufferedReader(new InputStreamReader(dataStream, StandardCharsets.UTF_8))
-                    .lines(),
-            Flux::fromStream,
-            Stream::close)
+    return Flux.using(() -> readProcessOutput(dataStream), Flux::fromStream, Stream::close)
         .doOnNext(data -> writeLogLine(fileChannel, data, writePos));
   }
 }

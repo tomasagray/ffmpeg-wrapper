@@ -1,92 +1,45 @@
-/*
- * Copyright (c) 2023.
- *
- * This file is part of Matchday.
- *
- * Matchday is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Matchday is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package net.tomasbot.ffmpeg_wrapper.unit;
-
-import net.tomasbot.ffmpeg_wrapper.FFmpeg;
-import net.tomasbot.ffmpeg_wrapper.FFmpegStreamTask;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("FFmpegTest - Test the creation of FFmpegSingleStreamTask HLS streaming task")
+import java.io.IOException;
+import net.tomasbot.ffmpeg_wrapper.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.*;
+
+@DisplayName("Validate FFmpeg Wrapper")
 class FFmpegTest {
 
-    private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
+  private static final Logger logger = LogManager.getLogger(FFmpegTest.class);
 
-    private static final String DEFAULT_ARGS =
-            "-v info -y -protocol_whitelist concat,file,http,https,tcp,tls,crypto";
-    // Test resources
-    private static FFmpegStreamTask hlsStreamTask;
+  private final String ffmpegPath;
 
-    private String storageLocation;
+  FFmpegTest() {
+    this.ffmpegPath = System.getenv("FFMPEG_PATH");
+    logger.info("FFmpeg path is: {}", this.ffmpegPath);
+  }
 
-    private String ffmpegLocation;
+  @Test
+  @DisplayName("Verify FFmpeg can be instantiated")
+  void testFFmpegInstantiation() {
+    logger.info("Instantiating FFmpeg with executable: {}", this.ffmpegPath);
 
-    @BeforeEach
-    public void setup() throws URISyntaxException {
-        if (hlsStreamTask == null) {
-            FFmpeg ffmpeg = new FFmpeg(ffmpegLocation);
-        }
-    }
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    logger.info("FFmpeg is: {}", ffmpeg);
 
-    @Test
-    @DisplayName("Ensure task has correct # of arguments")
-    void minArgLength() throws URISyntaxException {
-        setup();
+    assertThat(ffmpeg).isNotNull();
+  }
 
-        // Test params
-        final int minArgLength = 7;
+  @Test
+  @DisplayName("Validate FFmpeg version")
+  void testFFmpegVersion() throws IOException {
+    logger.info("Testing FFmpeg version of executable at: {}", this.ffmpegPath);
 
-        // Retrieve data from task
-        final List<String> args = new ArrayList<>();// hlsStreamTask.getTranscodeArgs();
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    String version = ffmpeg.getVersion();
+    logger.info("FFmpeg version: {}", version);
 
-        // Test
-        logger.info("Testing args: {}", args);
-        assertThat(args.size()).isGreaterThanOrEqualTo(minArgLength);
-    }
-
-    @Test
-    @DisplayName("Check command default format")
-    void testCommandFormat() {
-//        final String actualCommand = String.join(" ", hlsStreamTaskgetFfmpegArgs());
-//
-//        logger.info("Testing command: {}", actualCommand);
-//        assertThat(actualCommand).isEqualTo(DEFAULT_ARGS);
-    }
-
-    @Test
-    @DisplayName("Verify output path")
-    void outputPath() {
-        final Path expectedOutputPath = Path.of(storageLocation);
-//        final Path actualOutputPath = hlsStreamTask.getPlaylistPath();
-//
-//        logger.info("Testing output path: {}", actualOutputPath);
-//        assertThat(actualOutputPath).isEqualByComparingTo(expectedOutputPath);
-    }
+    assertThat(version).isNotNull().isNotEmpty();
+  }
 }
