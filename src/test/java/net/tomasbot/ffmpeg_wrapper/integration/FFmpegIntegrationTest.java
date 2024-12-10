@@ -217,4 +217,49 @@ public class FFmpegIntegrationTest {
     assertThat(actualWidth).isEqualTo(expectedThumbWidth);
     assertThat(actualHeight).isEqualTo(expectedThumbHeight);
   }
+
+  @Test
+  @DisplayName("Validate ability to cancel a stream")
+  void testKillStream() throws Exception {
+    // given
+    final int waitMs = 500;
+    final int maximumOutputSize = 1_000;
+    final int expectedExitCode = 137;
+
+    final URL testVideoUrl = TestData.getLargeVideoUrl();
+    final Path outputFile = Files.createTempFile("FFMPEG_KILL_STREAM_TEST_", ".mkv");
+
+    FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath);
+    AtomicInteger exitCode = new AtomicInteger(-1);
+    SimpleTranscodeRequest transcodeRequest =
+        SimpleTranscodeRequest.builder()
+            .from(testVideoUrl.toURI())
+            .to(outputFile)
+            .onEvent(logger::info)
+            .onError(logger::error)
+            .onComplete(exitCode::lazySet)
+            .build();
+
+    // when
+    logger.info("Streaming from: {} to: {}", testVideoUrl, outputFile);
+    FFmpegStreamTask streamTask = ffmpeg.getTranscodeTask(transcodeRequest);
+    streamTask.start(); // run task in background
+
+    // ... wait...
+    logger.info("Waiting {}ms ...", waitMs);
+    TimeUnit.MILLISECONDS.sleep(waitMs);
+    logger.info("Killing stream ...");
+    final boolean killed = streamTask.kill();
+
+    // then
+    final int actualExitCode = exitCode.get();
+    final long actualOutputSize = Files.size(outputFile);
+    logger.info("Successfully killed stream? {}", killed);
+    logger.info("Exit code: {}", actualExitCode);
+    logger.info("Transcode output size: {} bytes", actualOutputSize);
+
+    assertThat(killed).isTrue();
+    assertThat(actualExitCode).isNotZero().isEqualTo(expectedExitCode);
+    assertThat(actualOutputSize).isLessThan(maximumOutputSize);
+  }
 }

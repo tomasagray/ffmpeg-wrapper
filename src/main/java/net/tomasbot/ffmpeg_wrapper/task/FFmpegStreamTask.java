@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class FFmpegStreamTask extends LoggableThread {
   
   private static final String LOG_FILENAME = "ffmpeg-%s.log";
+  private static final int KILL_TIMEOUT = 250;
   private static final OpenOption[] LOG_FILE_OPTS = {
     StandardOpenOption.CREATE, StandardOpenOption.WRITE
   };
@@ -93,14 +95,15 @@ public abstract class FFmpegStreamTask extends LoggableThread {
    *
    * @return True/false if the task was successfully killed
    */
-  public final boolean kill() {
-    // Ensure process exists
+  public final boolean kill() throws InterruptedException {
+    // ensure process exists
     if (process != null) {
       ProcessHandle.allProcesses()
           .filter(p -> p.pid() == process.pid())
           .findFirst()
           .ifPresent(ProcessHandle::destroyForcibly);
-      // Ensure process is dead
+
+      TimeUnit.MILLISECONDS.sleep(KILL_TIMEOUT); // ensure process is dead
       return !process.isAlive();
     }
     return false;
