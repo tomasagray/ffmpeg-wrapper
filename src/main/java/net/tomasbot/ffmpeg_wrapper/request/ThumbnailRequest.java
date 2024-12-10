@@ -1,4 +1,4 @@
-package net.tomasbot.ffmpeg_wrapper;
+package net.tomasbot.ffmpeg_wrapper.request;
 
 import java.nio.file.Path;
 import java.time.LocalTime;

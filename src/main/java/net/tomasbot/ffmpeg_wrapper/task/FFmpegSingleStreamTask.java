@@ -1,4 +1,4 @@
-package net.tomasbot.ffmpeg_wrapper;
+package net.tomasbot.ffmpeg_wrapper.task;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 

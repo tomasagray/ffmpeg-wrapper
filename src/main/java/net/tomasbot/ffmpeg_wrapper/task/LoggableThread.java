@@ -1,4 +1,4 @@
-package net.tomasbot.ffmpeg_wrapper;
+package net.tomasbot.ffmpeg_wrapper.task;
 
 import java.util.function.Consumer;
 import lombok.Data;

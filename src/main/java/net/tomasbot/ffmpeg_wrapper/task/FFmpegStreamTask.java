@@ -1,4 +1,4 @@
-package net.tomasbot.ffmpeg_wrapper;
+package net.tomasbot.ffmpeg_wrapper.task;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import net.tomasbot.ffmpeg_wrapper.FFmpegLogger;
+import net.tomasbot.ffmpeg_wrapper.request.LoggingTranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

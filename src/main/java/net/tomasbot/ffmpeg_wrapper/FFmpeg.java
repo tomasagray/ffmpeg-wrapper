@@ -9,6 +9,11 @@ import java.time.LocalTime;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.tomasbot.ffmpeg_wrapper.request.ThumbnailRequest;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.task.FFmpegConcatStreamTask;
+import net.tomasbot.ffmpeg_wrapper.task.FFmpegSingleStreamTask;
+import net.tomasbot.ffmpeg_wrapper.task.FFmpegStreamTask;
 import org.jetbrains.annotations.NotNull;
 
 public class FFmpeg extends FFexecutable {

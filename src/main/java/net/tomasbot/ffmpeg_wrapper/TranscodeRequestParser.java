@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
 import org.jetbrains.annotations.NotNull;
 
 public class TranscodeRequestParser {

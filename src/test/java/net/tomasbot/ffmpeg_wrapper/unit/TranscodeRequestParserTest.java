@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.nio.file.Path;
-import net.tomasbot.ffmpeg_wrapper.SimpleTranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.TranscodeRequestParser;
+import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;

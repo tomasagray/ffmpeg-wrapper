@@ -1,24 +1,24 @@
-package net.tomasbot.ffmpeg_wrapper;
+package net.tomasbot.ffmpeg_wrapper.request;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-public class SimpleTranscodeRequest extends LoggingTranscodeRequest {
+public class ConcatTranscodeRequest extends LoggingTranscodeRequest {
 
   @Builder
-  public SimpleTranscodeRequest(
-      URI from,
+  ConcatTranscodeRequest(
+      Collection<URI> from,
       Path to,
       String videoCodec,
       String audioCodec,
@@ -28,7 +28,7 @@ public class SimpleTranscodeRequest extends LoggingTranscodeRequest {
       Consumer<? super String> onEvent,
       Consumer<? super Integer> onComplete,
       Consumer<Throwable> onError) {
-    this.setFrom(List.of(from));
+    this.setFrom(new ArrayList<>(from));
     this.setTo(to);
     this.setVideoCodec(videoCodec);
     this.setAudioCodec(audioCodec);
