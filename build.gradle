@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group = 'net.tomasbot'
+version = findProperty('appVersion')
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Annotations
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    implementation 'org.jetbrains:annotations:23.0.0'
+
+    implementation 'io.projectreactor:reactor-core:3.7.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
+    testImplementation("io.github.hakky54:logcaptor:2.9.3")
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
