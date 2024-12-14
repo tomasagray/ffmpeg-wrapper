@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -21,8 +21,10 @@ import net.tomasbot.ffmpeg_wrapper.request.ConcatTranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
 import net.tomasbot.ffmpeg_wrapper.request.ThumbnailRequest;
 import net.tomasbot.ffmpeg_wrapper.task.FFmpegStreamTask;
+import net.tomasbot.ffmpeg_wrapper.util.RecursiveDirectoryDeleter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +37,27 @@ public class FFmpegIntegrationTest {
   private static final String VIDEO_CODEC = "h264";
   private static final String AUDIO_CODEC = "aac";
 
+  private static final Set<Path> cleanupDirs = new HashSet<>();
+
   private final String ffmpegPath;
+  private final boolean isCleanupEnabled;
 
   FFmpegIntegrationTest() {
     this.ffmpegPath = System.getenv("FFMPEG_PATH");
+    this.isCleanupEnabled = "true".equalsIgnoreCase(System.getenv("TEST_CLEANUP"));
+  }
+
+  @AfterAll
+  static void cleanup() throws Exception {
+    logger.info("Cleaning up test data ...");
+
+    for (Path cleanupDir : cleanupDirs) {
+      Files.walkFileTree(cleanupDir, new RecursiveDirectoryDeleter());
+
+      if (!cleanupDir.toFile().exists())
+        logger.info("Successfully cleaned up test data at: {}", cleanupDir);
+      else throw new IOException("Could not clean up test data at: " + cleanupDir);
+    }
   }
 
   private static void runTestTask(Thread task) {
@@ -62,7 +81,7 @@ public class FFmpegIntegrationTest {
     assertThat(testVideoUrl).isNotNull();
     // to
     final File transcodeOutput = File.createTempFile("FFMPEG_WRAPPER_TEST_", ".mkv");
-    transcodeOutput.deleteOnExit();
+    if (isCleanupEnabled) transcodeOutput.deleteOnExit();
     logger.info("Testing transcode of file: {} to: {}", testVideoUrl, transcodeOutput);
 
     final AtomicInteger actualExitCode = new AtomicInteger(-1);
@@ -102,7 +121,6 @@ public class FFmpegIntegrationTest {
     final URL testVideoUrl = TestData.getLargeVideoUrl();
     final Path transcodeOutputDir = Files.createTempDirectory("FFMPEG_HLS_TEST_");
     final Path transcodeOutput = transcodeOutputDir.resolve("playlist.m3u8");
-    transcodeOutputDir.toFile().deleteOnExit();
 
     final AtomicInteger exitCodeAccumulator = new AtomicInteger(-1);
     final SimpleTranscodeRequest transcodeRequest =
@@ -129,6 +147,8 @@ public class FFmpegIntegrationTest {
 
     assertThat(actualExitCode).isEqualTo(expectedExitCode);
     assertThat(actualSegmentCount).isNotZero().isEqualTo(expectedSegmentCount);
+
+    if (isCleanupEnabled) cleanupDirs.add(transcodeOutputDir);
   }
 
   @Test
@@ -142,7 +162,6 @@ public class FFmpegIntegrationTest {
 
     final Collection<URI> from = List.of(testVideoUrl.toURI(), testVideoUrl.toURI());
     final Path dataDir = Files.createTempDirectory("FFMPEG_CONCAT_TEST_");
-    dataDir.toFile().deleteOnExit();
     final Path outputFile = dataDir.resolve("concat.mkv");
 
     final AtomicInteger exitCode = new AtomicInteger(-1);
@@ -175,6 +194,8 @@ public class FFmpegIntegrationTest {
     logger.info("Output filesize: {}", actualFilesize);
     assertThat(actualExitCode).isEqualTo(expectedExitCode);
     assertThat(actualFilesize).isNotZero().isEqualTo(expectedFilesize);
+
+    if (isCleanupEnabled) cleanupDirs.add(dataDir);
   }
 
   @Test
@@ -186,7 +207,7 @@ public class FFmpegIntegrationTest {
     int expectedFilesize = 77_147;
 
     final Path output = Files.createTempFile("FFMPEG_THUMBNAIL_TEST", ".jpg");
-    output.toFile().deleteOnExit();
+    if (isCleanupEnabled) output.toFile().deleteOnExit();
     final URL testVideoUrl = this.getClass().getClassLoader().getResource(VIDEO_FILENAME);
     assertThat(testVideoUrl).isNotNull();
 
@@ -228,6 +249,7 @@ public class FFmpegIntegrationTest {
 
     final URL testVideoUrl = TestData.getLargeVideoUrl();
     final Path outputFile = Files.createTempFile("FFMPEG_KILL_STREAM_TEST_", ".mkv");
+    if (isCleanupEnabled) outputFile.toFile().deleteOnExit();
 
     FFmpeg ffmpeg = new FFmpeg(this.ffmpegPath, TestData.FFMPEG_BASE_ARGS);
     AtomicInteger exitCode = new AtomicInteger(-1);
