@@ -25,6 +25,7 @@ public class ConcatTranscodeRequest extends LoggingTranscodeRequest {
       List<FFmpegStream> streams,
       Map<String, Object> additionalArgs,
       boolean isLoggingEnabled,
+      Path logFile,
       Consumer<? super String> onEvent,
       Consumer<? super Integer> onComplete,
       Consumer<Throwable> onError) {
@@ -35,6 +36,7 @@ public class ConcatTranscodeRequest extends LoggingTranscodeRequest {
     this.setStreams(streams);
     this.setAdditionalArgs(additionalArgs);
     this.setLoggingEnabled(isLoggingEnabled);
+    this.setLogFile(logFile);
     this.setOnEvent(onEvent);
     this.setOnError(onError);
     this.setOnComplete(onComplete);

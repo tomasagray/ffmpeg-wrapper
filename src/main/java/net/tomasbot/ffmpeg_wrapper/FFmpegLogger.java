@@ -14,9 +14,9 @@ import reactor.core.publisher.Flux;
 public class FFmpegLogger implements ThreadLogger {
 
   private static void writeLogLine(
-      @NotNull AsynchronousFileChannel fileChannel,
-      @NotNull String data,
-      @NotNull AtomicInteger writePos) {
+      AsynchronousFileChannel fileChannel, String data, @NotNull AtomicInteger writePos) {
+    if (fileChannel == null || data == null) return;
+
     final String line = data + "\n";
     final byte[] bytes = line.getBytes(StandardCharsets.UTF_8);
     fileChannel.write(ByteBuffer.wrap(bytes), writePos.getAndAdd(bytes.length));
@@ -29,7 +29,7 @@ public class FFmpegLogger implements ThreadLogger {
   @Override
   @NotNull
   public synchronized Flux<String> beginLogging(
-      @NotNull Process process, @NotNull AsynchronousFileChannel fileChannel) {
+      @NotNull Process process, AsynchronousFileChannel fileChannel) {
     final AtomicInteger writePos = new AtomicInteger(0);
     final InputStream dataStream = process.getErrorStream();
     return Flux.using(() -> readProcessOutput(dataStream), Flux::fromStream, Stream::close)

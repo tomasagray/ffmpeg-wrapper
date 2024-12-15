@@ -33,6 +33,12 @@ public abstract class FFmpegStreamTask extends LoggableThread {
   protected String execCommand;
   protected TranscodeRequest request;
 
+  public static @NotNull Path getDefaultLogFile() {
+    final String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+    final String filename = String.format(LOG_FILENAME, timestamp);
+    return Path.of(filename);
+  }
+
   @Override
   public void run() {
     try {
@@ -42,6 +48,7 @@ public abstract class FFmpegStreamTask extends LoggableThread {
 
       if (loggingEnabled) {
         if (request instanceof LoggingTranscodeRequest loggingRequest) {
+          this.logFile = loggingRequest.getLogFile();
           this.onEvent = loggingRequest.getOnEvent();
           this.onError = loggingRequest.getOnError();
           this.onComplete = loggingRequest.getOnComplete();
@@ -59,9 +66,11 @@ public abstract class FFmpegStreamTask extends LoggableThread {
   }
 
   private void logStreamTask() throws IOException {
-    final Path logFile = getLogFile();
-    final AsynchronousFileChannel fileChannel =
-        AsynchronousFileChannel.open(logFile, LOG_FILE_OPTS);
+    AsynchronousFileChannel fileChannel = null;
+    if (getLogFile() != null) {
+      final Path logFile = resolveLogFile();
+      fileChannel = AsynchronousFileChannel.open(logFile, LOG_FILE_OPTS);
+    }
 
     logPublisher =
         new FFmpegLogger()
@@ -83,10 +92,9 @@ public abstract class FFmpegStreamTask extends LoggableThread {
   }
 
   @NotNull
-  private Path getLogFile() {
-    final Path loggingDir = request.getTo().getParent();
-    final String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
-    final String filename = String.format(LOG_FILENAME, timestamp);
+  private Path resolveLogFile() {
+    final Path loggingDir = this.request.getTo().getParent();
+    final Path filename = this.getLogFile();
     return loggingDir.resolve(filename);
   }
 
