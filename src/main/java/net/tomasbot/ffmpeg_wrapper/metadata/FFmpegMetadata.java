@@ -1,16 +1,14 @@
 package net.tomasbot.ffmpeg_wrapper.metadata;
 
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 /** Represents audio/video file metadata returned by FFPROBE */
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
+@EqualsAndHashCode
 public class FFmpegMetadata {
 
   private FFmpegFormat format;

@@ -46,6 +46,7 @@ public class FFprobe extends FFexecutable {
    * @throws IOException If the metadata could not be read or parsed
    */
   public FFmpegMetadata getFileMetadata(@NotNull final URI uri) throws IOException {
-    return JsonParser.fromJson(readFileMetadata(uri), FFmpegMetadata.class);
+    final String data = readFileMetadata(uri);
+    return JsonParser.fromJson(data, FFmpegMetadata.class);
   }
 }
