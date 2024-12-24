@@ -31,7 +31,18 @@ public class FFmpeg extends FFexecutable {
 
   public FFmpegStreamTask getHlsStreamTask(@NotNull TranscodeRequest request) {
     setBaseArgs(request);
-    request.setAdditionalArgs(getHlsArgs(request.getTo()));
+
+    final Map<String, Object> additionalArgs = new LinkedHashMap<>();
+    Map<String, Object> requestArgs = request.getAdditionalArgs();
+    if (requestArgs != null) {
+      additionalArgs.putAll(requestArgs);
+    }
+
+    final Map<String, Object> hlsArgs = getHlsArgs(request.getTo());
+    additionalArgs.putAll(hlsArgs);
+
+    request.setAdditionalArgs(additionalArgs);
+
     return new FFmpegSingleStreamTask(execPath, request);
   }
 
