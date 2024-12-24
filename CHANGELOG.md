@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.0.2] - 2024-12-24
+
+### Fixed
+
+- Bug: additional arguments are overwritten during HLS stream generation
+
 ## [0.0.1a] - 2024-12-09
 
 ### Added
