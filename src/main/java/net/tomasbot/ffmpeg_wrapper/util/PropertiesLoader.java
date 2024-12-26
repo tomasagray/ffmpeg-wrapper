@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class PropertiesLoader {
 
-  private static final String PROPERTIES_FILE = "application.properties";
+  private static final String PROPERTIES_FILE = "ffmpeg-wrapper.properties";
 
   private static Properties properties;
 
